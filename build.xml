@@ -1,0 +1,90 @@
+<project>
+	<target name="set-default-properties" >
+		<property name="jar_name" value="package" />
+	</target>
+
+	<target name="clean">
+		<delete dir="build" />
+		<delete dir="target" />
+		<delete dir="download" />
+	</target>
+
+	<target name="jar" depends="clean, set-default-properties, build-base">
+		<mkdir dir="target" />
+    	<jar jarfile="target/${jar_name}.jar">
+        	<zipfileset src="build/${jar_name}/${jar_name}.jar" excludes="META-INF/*" />
+	        <zipgroupfileset dir="lib" includes="*.jar" />
+	        <manifest>
+        		<attribute name="Main-Class" value="${main_path}"/>
+	        </manifest>
+    	</jar>
+	</target>
+
+	<target name="build-base" depends="compile">
+		<mkdir dir="build/${jar_name}" />
+		<jar destfile="build/${jar_name}/${jar_name}.jar" basedir="build/classes">
+			<manifest>
+				<attribute name="Main-Class" value="${main_path}" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="compile" depends="getDependencies">
+		<mkdir dir="build/classes" />
+		<javac destdir="build/classes">
+			<src path="src" />
+			<classpath refid="lib-classpath" />
+		</javac>
+	</target>
+
+	<target name="getDependencies">
+		<antcall target="getCoreNlp" />
+		<antcall target="getLog4j" />
+	</target>
+
+	<target name="checkForCoreNlp" >
+		<available file="lib/stanford-corenlp-3.2.0.jar" property="core-nlp-is-defined" />
+		<condition property="core-nlp-not-defined">
+      		<not><isset property="core-nlp-is-defined"/></not>
+    	</condition>
+	</target>
+
+	<target name="getCoreNlp" if="core-nlp-not-defined" depends="checkForCoreNlp">
+		<mkdir dir="download" />
+		<get src="http://nlp.stanford.edu/software/stanford-corenlp-full-2013-06-20.zip" dest="download/stanford.zip" />
+		<mkdir dir="download/extracted" />
+		<unzip src="download/stanford.zip" dest="download/extracted" />
+		<copy todir="lib" flatten="true">
+  			<fileset dir="download/extracted">
+    			<include name="**/*.jar"/>
+  			</fileset>
+		</copy>
+		<delete dir="download" />
+	</target>
+
+	<target name="checkForLog4j" >
+		<available file="lib/log4j-1.2.17.jar" property="log4j-is-defined" />
+		<condition property="log4j-not-defined">
+      		<not><isset property="log4j-is-defined"/></not>
+    	</condition>
+	</target>
+
+	<target name="getLog4j" if="log4j-not-defined" depends="checkForLog4j">
+		<mkdir dir="download" />
+		<get src="http://apache.osuosl.org/logging/log4j/1.2.17/log4j-1.2.17.zip" dest="download/log4j.zip" />
+		<mkdir dir="download/extracted" />
+		<unzip src="download/log4j.zip" dest="download/extracted" />
+		<copy todir="lib" flatten="true">
+  			<fileset dir="download/extracted">
+    			<include name="**/*.jar"/>
+  			</fileset>
+		</copy>
+		<delete dir="download" />
+	</target>
+
+	<path id="lib-classpath">
+		<fileset dir="lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+</project>

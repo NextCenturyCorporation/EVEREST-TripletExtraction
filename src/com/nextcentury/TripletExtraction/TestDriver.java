@@ -1,8 +1,15 @@
 package com.nextcentury.TripletExtraction;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
+
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
+import edu.stanford.nlp.util.CoreMap;
 
 public class TestDriver {
 
@@ -12,8 +19,11 @@ public class TestDriver {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		testParser();
+		//testParser();
 		//testExtraction();
+		testGetTaggedText();
+		testParseAndRemovePeriods();
+		testDependencyTree();
 	}
 	
 	private static void testExtraction() {
@@ -49,4 +59,34 @@ public class TestDriver {
 		}
 	}
 
+	private static void testGetTaggedText() {
+		String testSentence = "Now is the time for all good men to come to the aid of their country.";
+		
+		CoreNlpPOSTagger tagger = new CoreNlpPOSTagger();
+		
+		System.out.println(tagger.getTaggedText(testSentence));
+		System.out.println("\n");
+	}
+	
+	private static void testParseAndRemovePeriods() {
+		String testSentence = "Now is the time for all good men to come to the aid of their country.";
+		
+		CoreNlpParser parser = new CoreNlpParser();
+		List<Tree> results = parser.getTextAnnotatedTree(testSentence);
+		for(Tree tree : results) {
+			tree.pennPrint();
+		}
+		
+		System.out.println("\n");
+	}
+	
+	private static void testDependencyTree() {
+		String testSentence = "Now is the time for all good men to come to the aid of their country.";
+		
+		CoreNlpParser parser = new CoreNlpParser();
+		List<SemanticGraph> result = parser.getTextDependencyTree(testSentence);
+		for(SemanticGraph graph : result) {
+			graph.prettyPrint();
+		}
+	}
 }

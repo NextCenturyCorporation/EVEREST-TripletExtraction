@@ -1,6 +1,7 @@
 package com.nextcentury.TripletExtraction;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -8,14 +9,14 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import edu.stanford.nlp.ling.CoreAnnotations.SentencesAnnotation;
+import edu.stanford.nlp.ling.IndexedWord;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.semgraph.SemanticGraph;
+import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
 import edu.stanford.nlp.trees.Tree;
 import edu.stanford.nlp.trees.TreeCoreAnnotations.TreeAnnotation;
 import edu.stanford.nlp.util.CoreMap;
-
-import edu.stanford.nlp.semgraph.SemanticGraph;
-import edu.stanford.nlp.semgraph.SemanticGraphCoreAnnotations.CollapsedCCProcessedDependenciesAnnotation;
 
 /**
  * @author 	Josh Williams
@@ -40,6 +41,7 @@ public class CoreNlpParser {
 		pipeline = new StanfordCoreNLP(props);
 	}
 	
+	
 	/**
 	 * Creates a CoreNLP instance to annotate with the specified annotators
 	 * 
@@ -52,16 +54,36 @@ public class CoreNlpParser {
 		pipeline = new StanfordCoreNLP(props);
 	}
     
+	public List<Tree> getTextAnnotatedTree(String text) {
+		ArrayList<Tree> results = new ArrayList<Tree>();
+		List<CoreMap> annotationResults = annotate(text);
+		for(CoreMap sentence : annotationResults) {
+			results.add(sentence.get(TreeAnnotation.class));
+		}
+		return results;
+	};
+	
+	public List<SemanticGraph> getTextDependencyTree(String text) {
+		List<CoreMap> annotateResults = annotate(text);
+		ArrayList<SemanticGraph> results = new ArrayList<SemanticGraph>(); 
+		for(CoreMap sentence : annotateResults) {
+			results.add(sentence.get(CollapsedCCProcessedDependenciesAnnotation.class));
+		}
+		return results;
+	}
+	
 	/**
 	 * Perform the CoreNLP annotation on the entry string, returning the results
-	 * as a List of {@link CoreMap} objects corresponding to each sentence.
+	 * as a List of {@link CoreMap} objects corresponding to each sentence. </br>
+	 * </br>
+	 * <i>Basically just breaks the text into sentences.</i>
 	 *  
 	 * @param entryString String - The string to be annotated
 	 * @return List - List of {@link CoreMap} objects, each corresponding to
 	 * 		one sentence of the entryString parameter.
 	 * @see edu.stanford.nlp.util.CoreMap
 	 */
-	private List<CoreMap> annotate(String entryString) {
+	protected List<CoreMap> annotate(String entryString) {
 		Annotation document = new Annotation(entryString);
 	    
 	    long startMilli = new Date().getTime();
@@ -170,40 +192,60 @@ public class CoreNlpParser {
 		log.info(tree.children()[0].label());
 		log.info(tree.children()[0].children()[0].label());
 	}
-	
-	public static void main(String[] args) {
-		ExtractionService extractor = new ExtractionService();
-		Tree root = extractor.parser.parse("A rare black squirrel has become a regular visitor to a suburban garden").get(0);
-
-		Triplet output = extractor.extractTriplet(root);
-
-		if(output == null)
-			System.err.println("ERROR: Could not find triplet");
-		else
-			output.toString();
-	}
-	 */
-	
-	/**
-	 * Return the CoreNLP semantic graph result of the entryString as a
-	 * ArrayList of {@link SemanticGraph} objects
-	 * 
-	 * @param entryString String - The string to be processed
-	 * @return ArrayList - ArrayList containing {@link SemanticGraph} objects
-	 * 		representing each string
-	 */
-	public ArrayList<SemanticGraph> parseSemanticGraph(String entryString) {
+	*/
 		
-		List<CoreMap> sentences = annotate(entryString);
-	    
-	    ArrayList<SemanticGraph> ret = new ArrayList<SemanticGraph>();
-	     
-	    for(CoreMap sentence: sentences) {
-	    	SemanticGraph dependencies = sentence.get(CollapsedCCProcessedDependenciesAnnotation.class);
-	    	ret.add(dependencies);
-	    }
-	    
-	    return ret;
-	}
+	public static void main(String[] args) {
+		//ExtractionService extractor = new ExtractionService();
+		
+		CoreNlpParser parser = new CoreNlpParser();
+		
+		String sentence = "A rare black squirrel has become a regular visitor to a suburban garden";
+		
+		Tree root = parser.parseAndRemovePeriods(sentence)[0];
 
+		List<Triplet> output = parser.parseText(sentence);
+
+		if(output.size() == 0)
+			System.err.println("ERROR: Could not find triplet");
+		else {
+			for(Triplet out : output) {
+				System.out.println( out.toString() );
+			}
+		}
+
+		String testString = "Now is the time for all good men to come to the aid of their country.  Sam has a fork. A rare black squirrel has become a regular visitor to a suburban garden.";
+		
+		List<SemanticGraph> dependencies = parser.getTextDependencyTree(testString);
+		
+		if(dependencies.size() == 0)
+			System.err.println("ERROR: Could not find dependencies");
+		else {
+			
+			for(SemanticGraph graph : dependencies) {
+
+				System.out.println("Graph:");
+				System.out.println(graph.toString());
+
+				Collection<IndexedWord> roots = graph.getRoots();
+				
+				for(IndexedWord r : roots) {
+					System.out.println("Root:");
+					System.out.println(r.toString() );
+					System.out.println("Child Pairs:");
+					System.out.println(graph.childPairs(r).toString() );					
+				}
+				
+				System.out.println();
+				
+				System.out.println(graph.toString() );
+				System.out.println(graph.toDotFormat() );
+				System.out.println(graph.getRoots().toString());
+				System.out.println(graph.childRelns(graph.getFirstRoot()).toString() );
+				System.out.println(graph.childPairs(graph.getFirstRoot()).toString() );
+				System.out.println(graph.getEdgeSet().toString());
+				System.out.println(graph.vertexSet().toString());
+			}
+		}
+
+	}
 }

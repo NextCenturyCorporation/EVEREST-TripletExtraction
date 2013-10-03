@@ -72,6 +72,55 @@ public class CoreNlpParser {
 		return results;
 	}
 	
+	public String getRootChildrenAsString(String text) {
+		List<SemanticGraph> dependencies = getTextDependencyTree(text);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for(SemanticGraph graph : dependencies) {
+			sb.append("Graph:\n");
+			sb.append(graph.toString() + "\n");
+
+			Collection<IndexedWord> roots = graph.getRoots();
+			
+			for(IndexedWord r : roots) {
+				sb.append("Root:\n");
+				sb.append(r.toString() + "\n");
+				sb.append("Child Pairs:\n");
+				sb.append(graph.childPairs(r).toString() + "\n");
+				sb.append("Child Relations:\n");
+				sb.append(graph.childRelns(r).toString() + "\n");
+			}
+		}
+		
+		return sb.toString();
+	};
+	
+	public String getDotNotation(String text) {
+		List<SemanticGraph> dependencies = getTextDependencyTree(text);
+				
+		StringBuilder sb = new StringBuilder();
+				
+		for(SemanticGraph graph : dependencies) {
+			sb.append(graph.toDotFormat());
+		}
+		return sb.toString();
+	}
+	
+	public String getEdgeVertexNotation(String text) {
+		List<SemanticGraph> dependencies = getTextDependencyTree(text);
+		
+		StringBuilder sb = new StringBuilder();
+				
+		for(SemanticGraph graph : dependencies) {
+			sb.append("Edges:\n");
+			sb.append(graph.getEdgeSet());
+			sb.append("Vertecies:\n");
+			sb.append(graph.vertexSet());
+		}
+		return sb.toString();
+	}
+	
 	/**
 	 * Perform the CoreNLP annotation on the entry string, returning the results
 	 * as a List of {@link CoreMap} objects corresponding to each sentence. </br>

@@ -78,9 +78,6 @@ public class CoreNlpParser {
 		
 		String resultString = "";
 		for(SemanticGraph graph : dependencies) {
-			resultString += "Graph:\n";
-			resultString += (graph.toString() + "\n");
-
 			Collection<IndexedWord> roots = graph.getRoots();
 			
 			for(IndexedWord r : roots) {
@@ -99,29 +96,31 @@ public class CoreNlpParser {
 		return result;
 	};
 	
-	public String getDotNotation(String text) {
+	public List<String> getDotNotation(String text) {
 		List<SemanticGraph> dependencies = getTextDependencyTree(text);
-				
-		StringBuilder sb = new StringBuilder();
+		ArrayList<String> result = new ArrayList<String>();
 				
 		for(SemanticGraph graph : dependencies) {
-			sb.append(graph.toDotFormat());
+			result.add(graph.toDotFormat());
 		}
-		return sb.toString();
+		return result;
 	}
 	
-	public String getEdgeVertexNotation(String text) {
+	public List<String> getEdgeVertexNotationAsString(String text) {
 		List<SemanticGraph> dependencies = getTextDependencyTree(text);
+		ArrayList<String> result = new ArrayList<String>();
 		
-		StringBuilder sb = new StringBuilder();
-				
+		String rstring = "";		
 		for(SemanticGraph graph : dependencies) {
-			sb.append("Edges:\n");
-			sb.append(graph.getEdgeSet());
-			sb.append("Vertecies:\n");
-			sb.append(graph.vertexSet());
+			rstring += ("Edges:\n");
+			rstring += (graph.getEdgeSet());
+			rstring += ("Vertecies:\n");
+			rstring += (graph.vertexSet());
+			
+			result.add(rstring);
+			rstring = "";
 		}
-		return sb.toString();
+		return result;
 	}
 	
 	/**

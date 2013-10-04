@@ -72,18 +72,26 @@ public class CoreNlpPOSTagger{
 	}
 	
 	public List<String> getTaggedSentencesString(String text) {
-		List<TaggedToken[]> tagged = getTaggedSentences(text);
 		ArrayList<String> result = new ArrayList<String>();
 		
-		String resultString = "";
+		Annotation document1 = new Annotation(text);
+		pipeline.annotate(document1);
+		List<CoreMap> sentences = document1.get(SentencesAnnotation.class);
 		
-		for(TaggedToken[] array : tagged) {
-			for(TaggedToken token : array) {
-				resultString = resultString + "[" + token.tag + "]" + token.token + " ";
+		String resultString = "";
+		TaggedToken taggedToken;
+		
+		for(CoreMap sentence : sentences) {
+			
+			for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
+				taggedToken = new TaggedToken(token.get(PartOfSpeechAnnotation.class), token.toString());
+				resultString += resultString + "[" + taggedToken.tag + "]" + taggedToken.token + " ";
 			}
-			result.add(resultString.trim());
+			
+			result.add(resultString);
 			resultString = "";
 		}
+		
 		return result ;
 	}
 }

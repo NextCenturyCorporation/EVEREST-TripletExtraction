@@ -85,7 +85,7 @@ public class CoreNlpPOSTagger{
 			
 			for (CoreLabel token: sentence.get(TokensAnnotation.class)) {
 				taggedToken = new TaggedToken(token.get(PartOfSpeechAnnotation.class), token.toString());
-				resultString += resultString + "[" + taggedToken.tag + "]" + taggedToken.token + " ";
+				resultString = resultString + "[" + taggedToken.tag + "]" + taggedToken.token + " ";
 			}
 			
 			result.add(resultString);

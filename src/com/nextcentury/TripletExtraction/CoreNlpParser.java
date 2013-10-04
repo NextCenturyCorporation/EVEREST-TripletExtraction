@@ -72,28 +72,31 @@ public class CoreNlpParser {
 		return results;
 	}
 	
-	public String getRootChildrenAsString(String text) {
+	public List<String> getRootChildrenAsString(String text) {
 		List<SemanticGraph> dependencies = getTextDependencyTree(text);
+		ArrayList<String> result = new ArrayList<String>();
 		
-		StringBuilder sb = new StringBuilder();
-		
+		String resultString = "";
 		for(SemanticGraph graph : dependencies) {
-			sb.append("Graph:\n");
-			sb.append(graph.toString() + "\n");
+			resultString += "Graph:\n";
+			resultString += (graph.toString() + "\n");
 
 			Collection<IndexedWord> roots = graph.getRoots();
 			
 			for(IndexedWord r : roots) {
-				sb.append("Root:\n");
-				sb.append(r.toString() + "\n");
-				sb.append("Child Pairs:\n");
-				sb.append(graph.childPairs(r).toString() + "\n");
-				sb.append("Child Relations:\n");
-				sb.append(graph.childRelns(r).toString() + "\n");
+				resultString += ("Root:\n");
+				resultString += (r.toString() + "\n");
+				resultString += ("Child Pairs:\n");
+				resultString += (graph.childPairs(r).toString() + "\n");
+				resultString += ("Child Relations:\n");
+				resultString += (graph.childRelns(r).toString() + "\n");
 			}
+			
+			result.add(resultString);
+			resultString = "";
 		}
 		
-		return sb.toString();
+		return result;
 	};
 	
 	public String getDotNotation(String text) {

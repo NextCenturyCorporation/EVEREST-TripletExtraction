@@ -114,7 +114,7 @@ public class CoreNlpParser {
 		for(SemanticGraph graph : dependencies) {
 			rstring += ("Edges:\n");
 			rstring += (graph.getEdgeSet());
-			rstring += ("Vertecies:\n");
+			rstring += ("\nVertices:\n");
 			rstring += (graph.vertexSet());
 			
 			result.add(rstring);

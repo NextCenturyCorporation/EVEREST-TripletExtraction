@@ -84,9 +84,18 @@ public class CoreNlpParser {
 				resultString += ("Root:\n");
 				resultString += (r.toString() + "\n");
 				resultString += ("Child Pairs:\n");
-				resultString += (graph.childPairs(r).toString() + "\n");
+				try {
+					resultString += (graph.childPairs(r).toString() + "\n");
+				} catch (IllegalArgumentException e) {
+					resultString += ("N/A \n");
+				}
+
 				resultString += ("Child Relations:\n");
-				resultString += (graph.childRelns(r).toString() + "\n");
+				try {
+					resultString += (graph.childRelns(r).toString() + "\n");
+				} catch (IllegalArgumentException e) {
+					resultString += ("N/A \n");
+				}
 			}
 			
 			result.add(resultString);
